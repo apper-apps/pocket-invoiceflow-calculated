@@ -1,21 +1,23 @@
-import React, { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { toast } from 'react-toastify'
-import { format } from 'date-fns'
-import Modal from '@/components/atoms/Modal'
-import Button from '@/components/atoms/Button'
-import Input from '@/components/atoms/Input'
-import Select from '@/components/atoms/Select'
-import FormField from '@/components/molecules/FormField'
-import ApperIcon from '@/components/ApperIcon'
-import invoiceService from '@/services/api/invoiceService'
+import React, { useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { toast } from "react-toastify";
+import { format } from "date-fns";
+import ApperIcon from "@/components/ApperIcon";
+import Select from "@/components/atoms/Select";
+import Modal from "@/components/atoms/Modal";
+import Input from "@/components/atoms/Input";
+import Button from "@/components/atoms/Button";
+import FormField from "@/components/molecules/FormField";
+import Error from "@/components/ui/Error";
+import invoiceService from "@/services/api/invoiceService";
 
 const GSTExportModal = ({ isOpen, onClose, invoices = [] }) => {
   const [formData, setFormData] = useState({
     startDate: format(new Date(new Date().getFullYear(), new Date().getMonth(), 1), 'yyyy-MM-dd'),
     endDate: format(new Date(), 'yyyy-MM-dd'),
     format: 'excel',
-    status: 'all'
+    status: 'all',
+    periodFilter: 'custom'
   })
   const [isExporting, setIsExporting] = useState(false)
 
@@ -25,11 +27,33 @@ const GSTExportModal = ({ isOpen, onClose, invoices = [] }) => {
     { value: 'json', label: 'JSON Format' }
   ]
 
-  const statusOptions = [
+const statusOptions = [
     { value: 'all', label: 'All Invoices' },
     { value: 'paid', label: 'Paid Only' },
     { value: 'sent', label: 'Sent Only' },
     { value: 'draft', label: 'Draft Only' }
+  ];
+
+  const quarterOptions = [
+    { value: 'q1', label: 'Q1 (Jan-Mar)', months: [0, 1, 2] },
+    { value: 'q2', label: 'Q2 (Apr-Jun)', months: [3, 4, 5] },
+    { value: 'q3', label: 'Q3 (Jul-Sep)', months: [6, 7, 8] },
+    { value: 'q4', label: 'Q4 (Oct-Dec)', months: [9, 10, 11] }
+  ]
+
+  const monthOptions = [
+    { value: '0', label: 'January' },
+    { value: '1', label: 'February' },
+    { value: '2', label: 'March' },
+    { value: '3', label: 'April' },
+    { value: '4', label: 'May' },
+    { value: '5', label: 'June' },
+    { value: '6', label: 'July' },
+    { value: '7', label: 'August' },
+    { value: '8', label: 'September' },
+    { value: '9', label: 'October' },
+    { value: '10', label: 'November' },
+    { value: '11', label: 'December' }
   ]
 
   const handleInputChange = (field, value) => {
@@ -39,6 +63,60 @@ const GSTExportModal = ({ isOpen, onClose, invoices = [] }) => {
     }))
   }
 
+  const handleQuarterSelect = (quarter) => {
+    const currentYear = new Date().getFullYear()
+    const quarterData = quarterOptions.find(q => q.value === quarter)
+    
+    if (quarterData) {
+      const startMonth = quarterData.months[0]
+      const endMonth = quarterData.months[2]
+      
+      const startDate = new Date(currentYear, startMonth, 1)
+      const endDate = new Date(currentYear, endMonth + 1, 0) // Last day of end month
+      
+      setFormData(prev => ({
+        ...prev,
+        periodFilter: quarter,
+        startDate: format(startDate, 'yyyy-MM-dd'),
+        endDate: format(endDate, 'yyyy-MM-dd')
+      }))
+    }
+  }
+
+  const handleMonthSelect = (month) => {
+    const currentYear = new Date().getFullYear()
+    const monthIndex = parseInt(month)
+    
+    const startDate = new Date(currentYear, monthIndex, 1)
+    const endDate = new Date(currentYear, monthIndex + 1, 0) // Last day of month
+    
+    setFormData(prev => ({
+      ...prev,
+      periodFilter: `month-${month}`,
+      startDate: format(startDate, 'yyyy-MM-dd'),
+      endDate: format(endDate, 'yyyy-MM-dd')
+    }))
+  }
+
+  const handleDateChange = (field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value,
+      periodFilter: 'custom' // Reset to custom when manually changing dates
+    }))
+  }
+
+  const getPeriodLabel = () => {
+    if (formData.periodFilter.startsWith('q')) {
+      const quarter = quarterOptions.find(q => q.value === formData.periodFilter)
+      return quarter ? quarter.label : 'Custom Period'
+    } else if (formData.periodFilter.startsWith('month-')) {
+      const monthIndex = formData.periodFilter.split('-')[1]
+      const month = monthOptions.find(m => m.value === monthIndex)
+      return month ? month.label : 'Custom Period'
+    }
+    return 'Custom Period'
+  }
   const validateDateRange = () => {
     const start = new Date(formData.startDate)
     const end = new Date(formData.endDate)
@@ -137,15 +215,53 @@ const GSTExportModal = ({ isOpen, onClose, invoices = [] }) => {
         </p>
       </div>
 
-      {/* Form */}
+{/* Form */}
       <div className="space-y-4">
+        {/* Period Selection */}
+        <div className="space-y-3">
+          <FormField label="Quick Period Selection">
+            <div className="space-y-3">
+              {/* Quarter Buttons */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                {quarterOptions.map((quarter) => (
+                  <button
+                    key={quarter.value}
+                    type="button"
+                    onClick={() => handleQuarterSelect(quarter.value)}
+                    className={`px-3 py-2 text-sm font-medium rounded-lg border transition-colors ${
+                      formData.periodFilter === quarter.value
+                        ? 'bg-primary-600 text-white border-primary-600'
+                        : 'bg-white text-secondary-700 border-secondary-300 hover:bg-secondary-50'
+                    }`}
+                  >
+                    {quarter.label.split(' ')[0]}
+                  </button>
+                ))}
+              </div>
+              
+              {/* Month Selection */}
+              <div className="w-full">
+                <Select
+                  value={formData.periodFilter.startsWith('month-') ? formData.periodFilter.split('-')[1] : ''}
+                  onChange={(e) => e.target.value ? handleMonthSelect(e.target.value) : null}
+                  options={[
+                    { value: '', label: 'Select a month...' },
+                    ...monthOptions
+                  ]}
+                  placeholder="Or select a specific month"
+                />
+              </div>
+            </div>
+          </FormField>
+        </div>
+
         {/* Date Range */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <FormField label="Start Date" required>
             <Input
               type="date"
               value={formData.startDate}
-              onChange={(e) => handleInputChange('startDate', e.target.value)}
+              onChange={(e) => handleDateChange('startDate', e.target.value)}
               max={formData.endDate}
             />
           </FormField>
@@ -154,7 +270,7 @@ const GSTExportModal = ({ isOpen, onClose, invoices = [] }) => {
             <Input
               type="date"
               value={formData.endDate}
-              onChange={(e) => handleInputChange('endDate', e.target.value)}
+              onChange={(e) => handleDateChange('endDate', e.target.value)}
               min={formData.startDate}
               max={format(new Date(), 'yyyy-MM-dd')}
             />
@@ -179,20 +295,24 @@ const GSTExportModal = ({ isOpen, onClose, invoices = [] }) => {
           />
         </FormField>
 
-        {/* Preview Info */}
+{/* Preview Info */}
         <div className="bg-primary-50 border border-primary-200 rounded-lg p-4">
           <div className="flex items-start gap-3">
             <ApperIcon name="Info" size={18} className="text-primary-600 mt-0.5 flex-shrink-0" />
             <div className="text-sm">
               <p className="font-medium text-primary-900 mb-1">Export Preview</p>
               <p className="text-primary-700">
-                {getFilteredInvoicesCount()} invoices will be exported
+                {getFilteredInvoicesCount()} invoices will be exported for <strong>{getPeriodLabel()}</strong>
                 {formData.format === 'excel' && ' with separate tabs for B2B, B2C, and CDNR transactions'}
               </p>
+              {formData.periodFilter !== 'custom' && (
+                <p className="text-primary-600 mt-1 text-xs">
+                  📊 Perfect for quarterly GST filing - {formData.periodFilter.startsWith('q') ? 'Quarter' : 'Month'} selected
+                </p>
+              )}
             </div>
           </div>
         </div>
-
         {/* GST Compliance Info */}
         <div className="bg-secondary-50 border border-secondary-200 rounded-lg p-4">
           <div className="flex items-start gap-3">
