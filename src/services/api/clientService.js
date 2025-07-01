@@ -64,8 +64,31 @@ class ClientService {
     }
   }
   
-  async getById(id) {
+async getById(id) {
     try {
+      // Validate and convert ID to integer
+      if (id === null || id === undefined) {
+        throw new Error('Client ID is required');
+      }
+      
+      // Convert to integer if it's a string
+      let clientId;
+      if (typeof id === 'string') {
+        clientId = parseInt(id, 10);
+        if (isNaN(clientId)) {
+          throw new Error(`Invalid client ID format: ${id}`);
+        }
+      } else if (typeof id === 'number') {
+        clientId = Math.floor(id); // Ensure it's an integer
+      } else {
+        throw new Error(`Invalid client ID type: expected number or string, got ${typeof id}`);
+      }
+      
+      // Ensure positive integer
+      if (clientId <= 0) {
+        throw new Error(`Client ID must be a positive integer, got: ${clientId}`);
+      }
+      
       const params = {
         fields: [
           { field: { Name: "Name" } },
@@ -82,7 +105,7 @@ class ClientService {
         ]
       };
       
-      const response = await this.apperClient.getRecordById(this.tableName, id, params);
+      const response = await this.apperClient.getRecordById(this.tableName, clientId, params);
       
       if (!response.success) {
         console.error(response.message);
@@ -90,7 +113,7 @@ class ClientService {
       }
       
       if (!response.data) {
-        throw new Error('Client not found');
+        throw new Error(`Client with ID ${clientId} not found`);
       }
       
       // Transform data to match UI expectations
