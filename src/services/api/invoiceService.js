@@ -1,4 +1,5 @@
 import mockInvoices from '@/services/mockData/invoices.json'
+import gstExportService from '@/services/api/gstExportService'
 
 class InvoiceService {
   constructor() {
@@ -57,9 +58,49 @@ class InvoiceService {
       throw new Error('Invoice not found')
     }
     
-    this.data.splice(index, 1)
+this.data.splice(index, 1)
     return true
   }
-}
 
+  async generateGSTReport(filters = {}) {
+    await new Promise(resolve => setTimeout(resolve, 500))
+    
+    let filteredData = [...this.data]
+    
+    // Apply date range filter
+    if (filters.startDate) {
+      filteredData = filteredData.filter(invoice => 
+        new Date(invoice.createdAt) >= new Date(filters.startDate)
+      )
+    }
+    
+    if (filters.endDate) {
+      filteredData = filteredData.filter(invoice => 
+        new Date(invoice.createdAt) <= new Date(filters.endDate)
+      )
+    }
+
+    // Apply status filter
+    if (filters.status && filters.status !== 'all') {
+      filteredData = filteredData.filter(invoice => invoice.status === filters.status)
+    }
+
+    return gstExportService.prepareGSTData(filteredData)
+  }
+
+  async exportToExcel(filters = {}) {
+    const gstData = await this.generateGSTReport(filters)
+    return gstExportService.generateExcelExport(gstData, filters)
+  }
+
+  async exportToCSV(filters = {}) {
+    const gstData = await this.generateGSTReport(filters)
+    return gstExportService.generateCSVExport(gstData, filters)
+  }
+
+  async exportToJSON(filters = {}) {
+    const gstData = await this.generateGSTReport(filters)
+    return gstExportService.generateJSONExport(gstData, filters)
+  }
+}
 export default new InvoiceService()

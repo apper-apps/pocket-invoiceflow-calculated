@@ -10,6 +10,7 @@ import Loading from '@/components/ui/Loading'
 import Error from '@/components/ui/Error'
 import Empty from '@/components/ui/Empty'
 import invoiceService from '@/services/api/invoiceService'
+import GSTExportModal from '@/components/organisms/GSTExportModal'
 
 const Invoices = () => {
   const navigate = useNavigate()
@@ -19,7 +20,7 @@ const Invoices = () => {
   const [error, setError] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
-  
+  const [showGSTExport, setShowGSTExport] = useState(false)
   const statusOptions = [
     { value: '', label: 'All Statuses' },
     { value: 'draft', label: 'Draft' },
@@ -107,7 +108,7 @@ const Invoices = () => {
       transition={{ duration: 0.3 }}
     >
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-secondary-900 mb-2">Invoices</h1>
           <p className="text-secondary-600">
@@ -115,13 +116,24 @@ const Invoices = () => {
           </p>
         </div>
         
-        <Button
-          variant="primary"
-          icon="Plus"
-          onClick={() => navigate('/invoices/create')}
-        >
-          Create Invoice
-        </Button>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <Button
+            variant="secondary"
+            icon="Download"
+            onClick={() => setShowGSTExport(true)}
+            className="order-2 sm:order-1"
+          >
+            GST Export
+          </Button>
+          <Button
+            variant="primary"
+            icon="Plus"
+            onClick={() => navigate('/invoices/create')}
+            className="order-1 sm:order-2"
+          >
+            Create Invoice
+          </Button>
+        </div>
       </div>
       
       {/* Filters */}
@@ -159,7 +171,7 @@ const Invoices = () => {
           onAction={() => navigate('/invoices/create')}
           showAction={invoices.length === 0}
         />
-      ) : (
+) : (
         <InvoiceTable
           invoices={filteredInvoices}
           onEdit={handleEdit}
@@ -167,6 +179,13 @@ const Invoices = () => {
           onDuplicate={handleDuplicate}
         />
       )}
+
+      {/* GST Export Modal */}
+      <GSTExportModal
+        isOpen={showGSTExport}
+        onClose={() => setShowGSTExport(false)}
+        invoices={invoices}
+      />
     </motion.div>
   )
 }
