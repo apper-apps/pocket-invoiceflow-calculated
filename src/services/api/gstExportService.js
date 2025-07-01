@@ -20,12 +20,20 @@ class GSTExportService {
     }
   }
 
-  validateGSTIN(gstin) {
+validateGSTIN(gstin) {
     if (!gstin || typeof gstin !== 'string') return false
+    
+    // Remove spaces and convert to uppercase
+    const cleanGSTIN = gstin.replace(/\s/g, '').toUpperCase()
     
     // GSTIN format: 2 digits (state) + 10 alphanumeric + 1 digit + 1 letter + 1 alphanumeric
     const gstinRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}[Z]{1}[0-9A-Z]{1}$/
-    return gstinRegex.test(gstin.toUpperCase())
+    
+    if (!gstinRegex.test(cleanGSTIN)) return false
+    
+    // Additional validation: Check state code (01-37)
+    const stateCode = parseInt(cleanGSTIN.substring(0, 2))
+    return stateCode >= 1 && stateCode <= 37
   }
 
   calculateGSTBreakdown(taxAmount, taxRate, isInterState = false) {
@@ -48,28 +56,33 @@ class GSTExportService {
     }
   }
 
-  prepareGSTData(invoices) {
+prepareGSTData(invoices) {
     return invoices.map(invoice => {
       const gstInfo = this.mockGSTData[invoice.clientId] || this.mockGSTData[1]
       const isInterState = this.isInterStateTransaction(gstInfo.placeOfSupply)
       const gstBreakdown = this.calculateGSTBreakdown(invoice.taxAmount, invoice.tax, isInterState)
       
+      // Validate GSTIN and handle invalid cases
+      const isValidGSTIN = this.validateGSTIN(gstInfo.gstin)
+      
       return {
         invoiceNumber: invoice.invoiceNumber,
         invoiceDate: format(new Date(invoice.createdAt), 'dd/MM/yyyy'),
         clientName: invoice.clientName,
-        clientGSTIN: gstInfo.gstin,
+        clientGSTIN: isValidGSTIN ? gstInfo.gstin : 'INVALID_GSTIN',
         hsnCode: gstInfo.hsnCode,
-        taxableValue: invoice.subtotal,
-        cgst: gstBreakdown.cgst,
-        sgst: gstBreakdown.sgst,
-        igst: gstBreakdown.igst,
-        totalTax: invoice.taxAmount,
-        invoiceValue: invoice.total,
+        taxableValue: parseFloat(invoice.subtotal.toFixed(2)),
+        cgst: parseFloat(gstBreakdown.cgst.toFixed(2)),
+        sgst: parseFloat(gstBreakdown.sgst.toFixed(2)),
+        igst: parseFloat(gstBreakdown.igst.toFixed(2)),
+        totalTax: parseFloat(invoice.taxAmount.toFixed(2)),
+        invoiceValue: parseFloat(invoice.total.toFixed(2)),
         placeOfSupply: gstInfo.placeOfSupply,
         transactionType: this.categorizeTransaction(invoice, gstInfo),
         status: invoice.status,
         dueDate: format(new Date(invoice.dueDate), 'dd/MM/yyyy'),
+        gstinValid: isValidGSTIN,
+        taxRate: invoice.tax || 18,
         originalInvoice: invoice
       }
     })
@@ -96,44 +109,79 @@ class GSTExportService {
     return 'CDNR'
   }
 
-  generateExcelExport(gstData, filters) {
+generateExcelExport(gstData, filters) {
     const workbook = XLSX.utils.book_new()
     
-    // Separate data by transaction type
+    // Separate data by transaction type for GSTN compliance
     const b2bData = gstData.filter(item => item.transactionType === 'B2B')
     const b2cData = gstData.filter(item => item.transactionType === 'B2C')
     const cdnrData = gstData.filter(item => item.transactionType === 'CDNR')
     
-    // B2B Sheet
+    // Create Summary Sheet first (as per GSTN best practices)
+    const summarySheet = this.createSummarySheet(gstData, filters)
+    XLSX.utils.book_append_sheet(workbook, summarySheet, 'Summary')
+    
+    // B2B Sheet (Primary for GSTR-1)
     if (b2bData.length > 0) {
       const b2bSheet = this.createB2BSheet(b2bData)
-      XLSX.utils.book_append_sheet(workbook, b2bSheet, 'B2B')
+      XLSX.utils.book_append_sheet(workbook, b2bSheet, 'B2B_Transactions')
     }
     
     // B2C Sheet
     if (b2cData.length > 0) {
       const b2cSheet = this.createB2CSheet(b2cData)
-      XLSX.utils.book_append_sheet(workbook, b2cSheet, 'B2C')
+      XLSX.utils.book_append_sheet(workbook, b2cSheet, 'B2C_Transactions')
     }
     
-    // CDNR Sheet
+    // CDNR Sheet (Credit/Debit Notes)
     if (cdnrData.length > 0) {
       const cdnrSheet = this.createCDNRSheet(cdnrData)
-      XLSX.utils.book_append_sheet(workbook, cdnrSheet, 'CDNR')
+      XLSX.utils.book_append_sheet(workbook, cdnrSheet, 'CDNR_Transactions')
     }
     
-    // Summary Sheet
-    const summarySheet = this.createSummarySheet(gstData, filters)
-    XLSX.utils.book_append_sheet(workbook, summarySheet, 'Summary')
+    // Add validation sheet for GSTIN errors
+    const invalidGSTINData = gstData.filter(item => !item.gstinValid)
+    if (invalidGSTINData.length > 0) {
+      const validationSheet = this.createValidationSheet(invalidGSTINData)
+      XLSX.utils.book_append_sheet(workbook, validationSheet, 'Validation_Errors')
+    }
     
-    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' })
-    const filename = `GST_Report_${format(new Date(), 'yyyy-MM-dd')}.xlsx`
+    const excelBuffer = XLSX.write(workbook, { 
+      bookType: 'xlsx', 
+      type: 'array',
+      compression: true
+    })
+    
+    const periodLabel = filters.periodFilter !== 'custom' ? `_${filters.periodFilter}` : ''
+    const filename = `GSTN_Report${periodLabel}_${format(new Date(), 'yyyy-MM-dd')}.xlsx`
     
     return {
       data: excelBuffer,
       filename,
       mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     }
+  }
+
+  createValidationSheet(invalidData) {
+    const headers = [
+      'Invoice Number',
+      'Client Name',
+      'Invalid GSTIN',
+      'Issue',
+      'Invoice Value',
+      'Recommendation'
+    ]
+    
+    const rows = invalidData.map(item => [
+      item.invoiceNumber,
+      item.clientName,
+      item.clientGSTIN,
+      'Invalid GSTIN Format',
+      item.invoiceValue,
+      'Update client GSTIN or treat as B2C transaction'
+    ])
+    
+    return XLSX.utils.aoa_to_sheet([headers, ...rows])
   }
 
   createB2BSheet(b2bData) {

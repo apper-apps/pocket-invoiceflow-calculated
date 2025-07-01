@@ -21,10 +21,10 @@ const GSTExportModal = ({ isOpen, onClose, invoices = [] }) => {
   })
   const [isExporting, setIsExporting] = useState(false)
 
-  const formatOptions = [
-    { value: 'excel', label: 'Excel (XLSX) - Recommended' },
-    { value: 'csv', label: 'CSV Format' },
-    { value: 'json', label: 'JSON Format' }
+const formatOptions = [
+    { value: 'excel', label: 'Excel (XLSX) - GSTN Recommended Format' },
+    { value: 'csv', label: 'CSV Format - For Custom Processing' },
+    { value: 'json', label: 'JSON Format - For API Integration' }
   ]
 
 const statusOptions = [
@@ -209,12 +209,11 @@ const statusOptions = [
         </div>
         <h3 className="text-xl font-semibold text-secondary-900 mb-2">
           Export GST Report
-        </h3>
+</h3>
         <p className="text-secondary-600 text-sm">
-          Generate GST-ready reports for GSTR-1/GSTR-3B compliance
+          Generate GSTN-compliant reports for seamless GSTR-1/GSTR-3B filing with automatic B2B/B2C classification
         </p>
       </div>
-
 {/* Form */}
       <div className="space-y-4">
         {/* Period Selection */}
@@ -301,13 +300,18 @@ const statusOptions = [
             <ApperIcon name="Info" size={18} className="text-primary-600 mt-0.5 flex-shrink-0" />
             <div className="text-sm">
               <p className="font-medium text-primary-900 mb-1">Export Preview</p>
-              <p className="text-primary-700">
+<p className="text-primary-700">
                 {getFilteredInvoicesCount()} invoices will be exported for <strong>{getPeriodLabel()}</strong>
-                {formData.format === 'excel' && ' with separate tabs for B2B, B2C, and CDNR transactions'}
+                {formData.format === 'excel' && ' with separate worksheets for B2B, B2C, and CDNR transactions per GSTN requirements'}
               </p>
               {formData.periodFilter !== 'custom' && (
                 <p className="text-primary-600 mt-1 text-xs">
-                  📊 Perfect for quarterly GST filing - {formData.periodFilter.startsWith('q') ? 'Quarter' : 'Month'} selected
+                  📊 Perfect for quarterly GST filing - {formData.periodFilter.startsWith('q') ? 'Quarter' : 'Month'} selected for GSTR compliance
+                </p>
+              )}
+              {formData.format === 'excel' && (
+                <p className="text-primary-600 mt-1 text-xs">
+                  💡 Excel format includes summary sheet with transaction breakdown and tax totals
                 </p>
               )}
             </div>
@@ -318,12 +322,15 @@ const statusOptions = [
           <div className="flex items-start gap-3">
             <ApperIcon name="Shield" size={18} className="text-secondary-600 mt-0.5 flex-shrink-0" />
             <div className="text-sm">
-              <p className="font-medium text-secondary-900 mb-1">GST Compliance</p>
+              <p className="font-medium text-secondary-900 mb-1">GSTN Compliance Features</p>
               <ul className="text-secondary-700 space-y-1">
-                <li>• Includes GSTIN validation and HSN codes</li>
-                <li>• Categorizes B2B, B2C, and CDNR transactions</li>
-                <li>• Provides taxable value, CGST, SGST, and IGST details</li>
-                <li>• Ready for GSTR-1 and GSTR-3B filing</li>
+                <li>• Automated GSTIN format validation (15-digit alphanumeric)</li>
+                <li>• HSN/SAC code mapping with proper classification</li>
+                <li>• Inter-state vs Intra-state transaction detection</li>
+                <li>• CGST/SGST/IGST breakdown as per GST rules</li>
+                <li>• B2B, B2C, and CDNR categorization for GSTR-1</li>
+                <li>• Place of supply tracking for accurate tax calculation</li>
+                <li>• Summary totals ready for GSTR-3B filing</li>
               </ul>
             </div>
           </div>

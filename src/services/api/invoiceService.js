@@ -88,19 +88,40 @@ this.data.splice(index, 1)
     return gstExportService.prepareGSTData(filteredData)
   }
 
-  async exportToExcel(filters = {}) {
-    const gstData = await this.generateGSTReport(filters)
-    return gstExportService.generateExcelExport(gstData, filters)
+async exportToExcel(filters = {}) {
+    try {
+      const gstData = await this.generateGSTReport(filters)
+      if (!gstData || gstData.length === 0) {
+        throw new Error('No invoice data found for the selected criteria')
+      }
+      return gstExportService.generateExcelExport(gstData, filters)
+    } catch (error) {
+      throw new Error(`Excel export failed: ${error.message}`)
+    }
   }
 
   async exportToCSV(filters = {}) {
-    const gstData = await this.generateGSTReport(filters)
-    return gstExportService.generateCSVExport(gstData, filters)
+    try {
+      const gstData = await this.generateGSTReport(filters)
+      if (!gstData || gstData.length === 0) {
+        throw new Error('No invoice data found for the selected criteria')
+      }
+      return gstExportService.generateCSVExport(gstData, filters)
+    } catch (error) {
+      throw new Error(`CSV export failed: ${error.message}`)
+    }
   }
 
   async exportToJSON(filters = {}) {
-    const gstData = await this.generateGSTReport(filters)
-    return gstExportService.generateJSONExport(gstData, filters)
+    try {
+      const gstData = await this.generateGSTReport(filters)
+      if (!gstData || gstData.length === 0) {
+        throw new Error('No invoice data found for the selected criteria')
+      }
+      return gstExportService.generateJSONExport(gstData, filters)
+    } catch (error) {
+      throw new Error(`JSON export failed: ${error.message}`)
+    }
   }
 }
 export default new InvoiceService()
