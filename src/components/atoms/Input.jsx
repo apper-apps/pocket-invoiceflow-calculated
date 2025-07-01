@@ -3,23 +3,23 @@ import PropTypes from "prop-types";
 import ApperIcon from "@/components/ApperIcon";
 
 const Input = forwardRef(({ 
-  label,
-  error,
-  icon,
-  iconPosition = 'left',
-  className = '',
-  type = 'text',
-  required = false,
+  label, 
+  type = 'text', 
+  error, 
+  icon, 
+  iconPosition = 'left', 
+  required = false, 
+  className = '', 
   ...props 
 }, ref) => {
-  // Defensive programming - ensure props are valid
-  const safeLabel = label || null
-  const safeError = error || null
-  const safeIcon = icon || null
-  const safeIconPosition = ['left', 'right'].includes(iconPosition) ? iconPosition : 'left'
-  const safeClassName = typeof className === 'string' ? className : ''
-  const safeType = typeof type === 'string' ? type : 'text'
+  // Safe prop handling with defaults
+  const safeLabel = label || ''
+  const safeType = type || 'text'
+  const safeError = error || ''
+  const safeIcon = icon || ''
+  const safeIconPosition = iconPosition || 'left'
   const safeRequired = Boolean(required)
+  const safeClassName = className || ''
 
   try {
     const baseClasses = 'w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 transition-colors'
@@ -80,12 +80,12 @@ Input.displayName = 'Input'
 
 Input.propTypes = {
   label: PropTypes.string,
+  type: PropTypes.string,
   error: PropTypes.string,
   icon: PropTypes.string,
   iconPosition: PropTypes.oneOf(['left', 'right']),
-  className: PropTypes.string,
-  type: PropTypes.string,
-  required: PropTypes.bool
+  required: PropTypes.bool,
+  className: PropTypes.string
 }
 
 export default Input
