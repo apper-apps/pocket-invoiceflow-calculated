@@ -1,5 +1,5 @@
-import React, { forwardRef } from 'react'
-import ApperIcon from '@/components/ApperIcon'
+import React, { forwardRef } from "react";
+import ApperIcon from "@/components/ApperIcon";
 
 const Input = forwardRef(({ 
   label,
@@ -56,3 +56,5 @@ const Input = forwardRef(({
 Input.displayName = 'Input'
 
 export default Input
+
+Input.displayName = 'Input'
