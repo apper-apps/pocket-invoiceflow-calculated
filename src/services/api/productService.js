@@ -1,60 +1,228 @@
-import mockProducts from '@/services/mockData/products.json'
-
 class ProductService {
   constructor() {
-    this.data = [...mockProducts]
+    const { ApperClient } = window.ApperSDK;
+    this.apperClient = new ApperClient({
+      apperProjectId: import.meta.env.VITE_APPER_PROJECT_ID,
+      apperPublicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
+    });
+    this.tableName = 'product';
   }
   
   async getAll() {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 300))
-    return [...this.data]
+    try {
+      const params = {
+        fields: [
+          { field: { Name: "Name" } },
+          { field: { Name: "sku" } },
+          { field: { Name: "price" } },
+          { field: { Name: "description" } },
+          { field: { Name: "category" } },
+          { field: { Name: "created_at" } }
+        ],
+        orderBy: [
+          {
+            fieldName: "created_at",
+            sorttype: "DESC"
+          }
+        ]
+      };
+      
+      const response = await this.apperClient.fetchRecords(this.tableName, params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        throw new Error(response.message);
+      }
+      
+      // Transform data to match UI expectations
+      const transformedData = response.data.map(product => ({
+        Id: product.Id,
+        name: product.Name,
+        sku: product.sku,
+        price: parseFloat(product.price),
+        description: product.description,
+        category: product.category,
+        createdAt: product.created_at
+      }));
+      
+      return transformedData;
+    } catch (error) {
+      console.error('Error fetching products:', error);
+      throw error;
+    }
   }
   
   async getById(id) {
-    await new Promise(resolve => setTimeout(resolve, 200))
-    const product = this.data.find(item => item.Id === id)
-    if (!product) {
-      throw new Error('Product not found')
+    try {
+      const params = {
+        fields: [
+          { field: { Name: "Name" } },
+          { field: { Name: "sku" } },
+          { field: { Name: "price" } },
+          { field: { Name: "description" } },
+          { field: { Name: "category" } },
+          { field: { Name: "created_at" } }
+        ]
+      };
+      
+      const response = await this.apperClient.getRecordById(this.tableName, id, params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        throw new Error(response.message);
+      }
+      
+      if (!response.data) {
+        throw new Error('Product not found');
+      }
+      
+      // Transform data to match UI expectations
+      const product = response.data;
+      return {
+        Id: product.Id,
+        name: product.Name,
+        sku: product.sku,
+        price: parseFloat(product.price),
+        description: product.description,
+        category: product.category,
+        createdAt: product.created_at
+      };
+    } catch (error) {
+      console.error(`Error fetching product with ID ${id}:`, error);
+      throw error;
     }
-    return { ...product }
   }
   
-  async create(product) {
-    await new Promise(resolve => setTimeout(resolve, 400))
-    
-    const newProduct = {
-      ...product,
-      Id: Math.max(...this.data.map(item => item.Id), 0) + 1,
-      createdAt: new Date().toISOString()
+  async create(productData) {
+    try {
+      const params = {
+        records: [{
+          Name: productData.name,
+          sku: productData.sku,
+          price: parseFloat(productData.price),
+          description: productData.description,
+          category: productData.category,
+          created_at: new Date().toISOString()
+        }]
+      };
+      
+      const response = await this.apperClient.createRecord(this.tableName, params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        throw new Error(response.message);
+      }
+      
+      if (response.results) {
+        const successfulRecords = response.results.filter(result => result.success);
+        const failedRecords = response.results.filter(result => !result.success);
+        
+        if (failedRecords.length > 0) {
+          console.error(`Failed to create ${failedRecords.length} records:${JSON.stringify(failedRecords)}`);
+          throw new Error('Failed to create product');
+        }
+        
+        if (successfulRecords.length > 0) {
+          const newProduct = successfulRecords[0].data;
+          return {
+            Id: newProduct.Id,
+            name: newProduct.Name,
+            sku: newProduct.sku,
+            price: parseFloat(newProduct.price),
+            description: newProduct.description,
+            category: newProduct.category,
+            createdAt: newProduct.created_at
+          };
+        }
+      }
+      
+      throw new Error('Failed to create product');
+    } catch (error) {
+      console.error('Error creating product:', error);
+      throw error;
     }
-    
-    this.data.push(newProduct)
-    return { ...newProduct }
   }
   
-  async update(id, product) {
-    await new Promise(resolve => setTimeout(resolve, 400))
-    
-    const index = this.data.findIndex(item => item.Id === id)
-    if (index === -1) {
-      throw new Error('Product not found')
+  async update(id, productData) {
+    try {
+      const params = {
+        records: [{
+          Id: parseInt(id),
+          Name: productData.name,
+          sku: productData.sku,
+          price: parseFloat(productData.price),
+          description: productData.description,
+          category: productData.category
+        }]
+      };
+      
+      const response = await this.apperClient.updateRecord(this.tableName, params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        throw new Error(response.message);
+      }
+      
+      if (response.results) {
+        const successfulUpdates = response.results.filter(result => result.success);
+        const failedUpdates = response.results.filter(result => !result.success);
+        
+        if (failedUpdates.length > 0) {
+          console.error(`Failed to update ${failedUpdates.length} records:${JSON.stringify(failedUpdates)}`);
+          throw new Error('Failed to update product');
+        }
+        
+        if (successfulUpdates.length > 0) {
+          const updatedProduct = successfulUpdates[0].data;
+          return {
+            Id: updatedProduct.Id,
+            name: updatedProduct.Name,
+            sku: updatedProduct.sku,
+            price: parseFloat(updatedProduct.price),
+            description: updatedProduct.description,
+            category: updatedProduct.category,
+            createdAt: updatedProduct.created_at
+          };
+        }
+      }
+      
+      throw new Error('Failed to update product');
+    } catch (error) {
+      console.error('Error updating product:', error);
+      throw error;
     }
-    
-    this.data[index] = { ...this.data[index], ...product }
-    return { ...this.data[index] }
   }
   
   async delete(id) {
-    await new Promise(resolve => setTimeout(resolve, 300))
-    
-    const index = this.data.findIndex(item => item.Id === id)
-    if (index === -1) {
-      throw new Error('Product not found')
+    try {
+      const params = {
+        RecordIds: [parseInt(id)]
+      };
+      
+      const response = await this.apperClient.deleteRecord(this.tableName, params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        throw new Error(response.message);
+      }
+      
+      if (response.results) {
+        const successfulDeletions = response.results.filter(result => result.success);
+        const failedDeletions = response.results.filter(result => !result.success);
+        
+        if (failedDeletions.length > 0) {
+          console.error(`Failed to delete ${failedDeletions.length} records:${JSON.stringify(failedDeletions)}`);
+          throw new Error('Failed to delete product');
+        }
+        
+        return successfulDeletions.length > 0;
+      }
+      
+      return false;
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      throw error;
     }
-    
-    this.data.splice(index, 1)
-    return true
   }
 }
 
