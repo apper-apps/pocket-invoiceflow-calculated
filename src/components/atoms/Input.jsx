@@ -2,6 +2,7 @@ import React, { forwardRef } from "react";
 import PropTypes from "prop-types";
 import ApperIcon from "@/components/ApperIcon";
 
+
 const Input = forwardRef(({ 
   label, 
   type = 'text', 
@@ -89,3 +90,15 @@ Input.propTypes = {
 }
 
 export default Input
+
+Input.displayName = 'Input'
+
+Input.propTypes = {
+  label: PropTypes.string,
+  type: PropTypes.string,
+  error: PropTypes.string,
+  icon: PropTypes.string,
+  iconPosition: PropTypes.oneOf(['left', 'right']),
+  required: PropTypes.bool,
+  className: PropTypes.string
+}
