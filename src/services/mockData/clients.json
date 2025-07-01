@@ -1,0 +1,130 @@
+[
+  {
+    "Id": 1,
+    "name": "ABC Corporation",
+    "email": "contact@abccorp.com",
+    "phone": "+91 98765 43210",
+    "company": "ABC Corporation",
+    "address": {
+      "street": "123 Business District",
+      "city": "Mumbai",
+      "state": "MH",
+      "zipCode": "400001",
+      "country": "India"
+    },
+    "gstin": "27AAAAA0000A1Z5",
+    "createdAt": "2024-01-15T10:30:00.000Z"
+  },
+  {
+    "Id": 2,
+    "name": "Tech Solutions Ltd",
+    "email": "info@techsolutions.in",
+    "phone": "+91 87654 32109",
+    "company": "Tech Solutions Ltd",
+    "address": {
+      "street": "456 IT Park",
+      "city": "Bangalore",
+      "state": "KA",
+      "zipCode": "560001",
+      "country": "India"
+    },
+    "gstin": "29BBBBB1111B2Y6",
+    "createdAt": "2024-01-20T14:15:00.000Z"
+  },
+  {
+    "Id": 3,
+    "name": "Green Energy Pvt Ltd",
+    "email": "hello@greenenergy.co.in",
+    "phone": "+91 76543 21098",
+    "company": "Green Energy Pvt Ltd",
+    "address": {
+      "street": "789 Eco Complex",
+      "city": "Pune",
+      "state": "MH",
+      "zipCode": "411001",
+      "country": "India"
+    },
+    "gstin": "27CCCCC2222C3X7",
+    "createdAt": "2024-02-01T09:45:00.000Z"
+  },
+  {
+    "Id": 4,
+    "name": "Digital Marketing Hub",
+    "email": "team@digitalmarketing.com",
+    "phone": "+91 65432 10987",
+    "company": "Digital Marketing Hub",
+    "address": {
+      "street": "321 Media Street",
+      "city": "Delhi",
+      "state": "DL",
+      "zipCode": "110001",
+      "country": "India"
+    },
+    "gstin": "07DDDDD3333D4W8",
+    "createdAt": "2024-02-10T16:20:00.000Z"
+  },
+  {
+    "Id": 5,
+    "name": "Manufacturing Works",
+    "email": "orders@manufacturing.co.in",
+    "phone": "+91 54321 09876",
+    "company": "Manufacturing Works",
+    "address": {
+      "street": "654 Industrial Area",
+      "city": "Chennai",
+      "state": "TN",
+      "zipCode": "600001",
+      "country": "India"
+    },
+    "gstin": "33EEEEE4444E5V9",
+    "createdAt": "2024-02-15T11:30:00.000Z"
+  },
+  {
+    "Id": 6,
+    "name": "Retail Chain Stores",
+    "email": "procurement@retailchain.in",
+    "phone": "+91 43210 98765",
+    "company": "Retail Chain Stores",
+    "address": {
+      "street": "987 Shopping Complex",
+      "city": "Hyderabad",
+      "state": "TG",
+      "zipCode": "500001",
+      "country": "India"
+    },
+    "gstin": "36FFFFF5555F6U0",
+    "createdAt": "2024-02-20T13:45:00.000Z"
+  },
+  {
+    "Id": 7,
+    "name": "Consulting Services",
+    "email": "contact@consulting.co.in",
+    "phone": "+91 32109 87654",
+    "company": "Consulting Services",
+    "address": {
+      "street": "147 Professional Hub",
+      "city": "Kolkata",
+      "state": "WB",
+      "zipCode": "700001",
+      "country": "India"
+    },
+    "gstin": "19GGGGG6666G7T1",
+    "createdAt": "2024-02-25T08:15:00.000Z"
+  },
+  {
+    "Id": 8,
+    "name": "Healthcare Solutions",
+    "email": "admin@healthcare.in",
+    "phone": "+91 21098 76543",
+    "company": "Healthcare Solutions",
+    "address": {
+      "street": "258 Medical District",
+      "city": "Ahmedabad",
+      "state": "GJ",
+      "zipCode": "380001",
+      "country": "India"
+    },
+    "gstin": "24HHHHH7777H8S2",
+    "createdAt": "2024-03-01T12:00:00.000Z"
+  }
+]

@@ -1,0 +1,110 @@
+[
+  {
+    "Id": 1,
+    "name": "Web Development Service",
+    "sku": "WEB-DEV-001",
+    "price": 50000,
+    "description": "Complete web development service including design, development, and deployment",
+    "category": "Services",
+    "createdAt": "2024-01-10T10:00:00.000Z"
+  },
+  {
+    "Id": 2,
+    "name": "Mobile App Development",
+    "sku": "MOB-APP-002",
+    "price": 75000,
+    "description": "Native mobile app development for iOS and Android platforms",
+    "category": "Services",
+    "createdAt": "2024-01-10T10:15:00.000Z"
+  },
+  {
+    "Id": 3,
+    "name": "Digital Marketing Package",
+    "sku": "DIG-MKT-003",
+    "price": 25000,
+    "description": "Complete digital marketing package including SEO, social media, and content marketing",
+    "category": "Services",
+    "createdAt": "2024-01-10T10:30:00.000Z"
+  },
+  {
+    "Id": 4,
+    "name": "Software License",
+    "sku": "SOFT-LIC-004",
+    "price": 15000,
+    "description": "Annual software license for business management system",
+    "category": "Software",
+    "createdAt": "2024-01-10T10:45:00.000Z"
+  },
+  {
+    "Id": 5,
+    "name": "Cloud Hosting Service",
+    "sku": "CLOUD-HOST-005",
+    "price": 8000,
+    "description": "Monthly cloud hosting service with 99.9% uptime guarantee",
+    "category": "Hosting",
+    "createdAt": "2024-01-10T11:00:00.000Z"
+  },
+  {
+    "Id": 6,
+    "name": "UI/UX Design Service",
+    "sku": "UI-UX-006",
+    "price": 30000,
+    "description": "Professional UI/UX design service for web and mobile applications",
+    "category": "Design",
+    "createdAt": "2024-01-10T11:15:00.000Z"
+  },
+  {
+    "Id": 7,
+    "name": "Database Management",
+    "sku": "DB-MGMT-007",
+    "price": 20000,
+    "description": "Database design, optimization, and management service",
+    "category": "Services",
+    "createdAt": "2024-01-10T11:30:00.000Z"
+  },
+  {
+    "Id": 8,
+    "name": "API Development",
+    "sku": "API-DEV-008",
+    "price": 35000,
+    "description": "Custom API development and integration service",
+    "category": "Development",
+    "createdAt": "2024-01-10T11:45:00.000Z"
+  },
+  {
+    "Id": 9,
+    "name": "Security Audit",
+    "sku": "SEC-AUD-009",
+    "price": 40000,
+    "description": "Comprehensive security audit and vulnerability assessment",
+    "category": "Security",
+    "createdAt": "2024-01-10T12:00:00.000Z"
+  },
+  {
+    "Id": 10,
+    "name": "Training Workshop",
+    "sku": "TRAIN-WS-010",
+    "price": 12000,
+    "description": "Professional training workshop for technology and business skills",
+    "category": "Training",
+    "createdAt": "2024-01-10T12:15:00.000Z"
+  },
+  {
+    "Id": 11,
+    "name": "Content Management System",
+    "sku": "CMS-SYS-011",
+    "price": 45000,
+    "description": "Custom content management system development and setup",
+    "category": "Software",
+    "createdAt": "2024-01-10T12:30:00.000Z"
+  },
+  {
+    "Id": 12,
+    "name": "E-commerce Platform",
+    "sku": "ECOM-PLT-012",
+    "price": 80000,
+    "description": "Complete e-commerce platform with payment integration and inventory management",
+    "category": "E-commerce",
+    "createdAt": "2024-01-10T12:45:00.000Z"
+  }
+]
