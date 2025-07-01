@@ -108,9 +108,8 @@
   .table-row {
     @apply border-b border-secondary-200 hover:bg-secondary-50 transition-colors duration-150;
   }
-  
-  .sidebar-link {
-    @apply flex items-center px-4 py-3 text-secondary-700 hover:bg-primary-50 hover:text-primary-700 rounded-lg transition-all duration-200 group;
+.sidebar-link {
+    @apply flex items-center px-4 py-3 text-secondary-700 hover:bg-primary-50 hover:text-primary-700 rounded-lg transition-all duration-200;
   }
   
   .sidebar-link.active {
