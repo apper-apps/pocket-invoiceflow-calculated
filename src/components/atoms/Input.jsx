@@ -1,4 +1,5 @@
 import React, { forwardRef } from "react";
+import PropTypes from "prop-types";
 import ApperIcon from "@/components/ApperIcon";
 
 const Input = forwardRef(({ 
@@ -11,50 +12,80 @@ const Input = forwardRef(({
   required = false,
   ...props 
 }, ref) => {
-  const inputClasses = `form-input ${icon ? (iconPosition === 'left' ? 'pl-12' : 'pr-12') : ''} ${error ? 'border-error-500 focus:ring-error-500 focus:border-error-500' : ''} ${className}`
-  
-  return (
-    <div className="form-group">
-      {label && (
-        <label className="form-label">
-          {label}
-          {required && <span className="text-error-500 ml-1">*</span>}
-        </label>
-      )}
-      
+  // Defensive programming - ensure props are valid
+  const safeLabel = label || null
+  const safeError = error || null
+  const safeIcon = icon || null
+  const safeIconPosition = ['left', 'right'].includes(iconPosition) ? iconPosition : 'left'
+  const safeClassName = typeof className === 'string' ? className : ''
+  const safeType = typeof type === 'string' ? type : 'text'
+  const safeRequired = Boolean(required)
+
+  try {
+    const baseClasses = 'w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 transition-colors'
+    const errorClasses = safeError ? 'border-red-500 focus:ring-red-200' : 'border-gray-300 focus:ring-blue-200 focus:border-blue-500'
+    const iconClasses = safeIcon ? (safeIconPosition === 'left' ? 'pl-10' : 'pr-10') : ''
+    const inputClasses = `${baseClasses} ${errorClasses} ${iconClasses} ${safeClassName}`
+
+    return (
       <div className="relative">
-        {icon && iconPosition === 'left' && (
-          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-            <ApperIcon name={icon} size={18} className="text-secondary-400" />
-          </div>
+        {safeLabel && (
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            {safeLabel}
+            {safeRequired && <span className="text-red-500 ml-1">*</span>}
+          </label>
         )}
         
-        <input
-          ref={ref}
-          type={type}
-          className={inputClasses}
-          {...props}
-        />
+        <div className="relative">
+          {safeIcon && (
+            <div className={`absolute inset-y-0 ${safeIconPosition === 'left' ? 'left-0 pl-3' : 'right-0 pr-3'} flex items-center pointer-events-none`}>
+              <ApperIcon name={safeIcon} className="h-5 w-5 text-gray-400" />
+            </div>
+          )}
+          
+          <input
+            ref={ref}
+            type={safeType}
+            className={inputClasses}
+            required={safeRequired}
+            {...props}
+          />
+        </div>
         
-        {icon && iconPosition === 'right' && (
-          <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
-            <ApperIcon name={icon} size={18} className="text-secondary-400" />
-          </div>
+        {safeError && (
+          <p className="mt-1 text-sm text-red-600">{safeError}</p>
         )}
       </div>
-      
-      {error && (
-        <p className="text-sm text-error-600 mt-1 flex items-center">
-          <ApperIcon name="AlertCircle" size={16} className="mr-1" />
-          {error}
-        </p>
-      )}
-    </div>
-  )
+    )
+  } catch (err) {
+    // Error boundary fallback
+    console.error('Input component error:', err)
+    return (
+      <div className="relative">
+        <input
+          ref={ref}
+          type="text"
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200"
+          {...props}
+        />
+        {safeError && (
+          <p className="mt-1 text-sm text-red-600">{safeError}</p>
+        )}
+      </div>
+    )
+  }
 })
 
 Input.displayName = 'Input'
 
-export default Input
+Input.propTypes = {
+  label: PropTypes.string,
+  error: PropTypes.string,
+  icon: PropTypes.string,
+  iconPosition: PropTypes.oneOf(['left', 'right']),
+  className: PropTypes.string,
+  type: PropTypes.string,
+  required: PropTypes.bool
+}
 
-Input.displayName = 'Input'
+export default Input
